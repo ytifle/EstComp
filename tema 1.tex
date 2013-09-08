@@ -12,7 +12,7 @@
 
 \begin{quote}
 \begin{center}
-\emph{\textquestiondown Cual es la función básica de un computador?} \\ Es ejecutar instrucciones.
+\emph{\textquestiondown Cuál es la función básica de un computador?} \\ Es ejecutar instrucciones.
 \end{center}
 \end{quote}
 Estas instrucciones contienen operaciones sencillas, tales como transferencias de información, cálculos aritmético-lógicos...
@@ -32,7 +32,7 @@ Las instrucciones tienen un orden, que en general es:
 
 En la arquitectura de un computador Von Neumann, se tiene un modelo de computación que está basado en 3 conceptos básicos:
 \begin{itemize}
-\item \emph{Donde se encuentran las instrucciones}---En un computador Von Newmann, los datos y las instrucciones del programa a ejecutar están almacenadas en una \emph{única} memoria de lectura/escritura que denominamos la \emph{memoria principal}. Se denomina modelo de programa almacenado.
+\item Los datos y las instrucciones del programa a ejecutar están almacenadas en una \emph{única} memoria de lectura/escritura que denominamos la \emph{memoria principal}. Se denomina modelo de programa almacenado.
 \item La memoria principal del computador Von Newmann es accesible por direcciones, lo que significa que cada uno de los contenidos de memoria es accesible sólo con su dirección.
 \item La ejecución de las instrucciones en un computador Von Newmann es secuencial, es decir, una instrucción tras otra.
 \end{itemize}
@@ -56,7 +56,7 @@ Conectando todos estos elementos, están los buses de datos. Conectan las difere
 Existen 3 tipos de buses:
 \begin{itemize}
 \item \emph{Bus de Direcciones}--- Direcciona la memoria principal según lo que ordene el procesador.
-\item \emph{Bus de Datos}--- Vuelcan los datos entre la memoria y el procesador
+\item \emph{Bus de Datos}--- Vuelca los datos entre la memoria y el procesador
 \item \emph{Bus de Control}--- Manda las instrucciones (señales) del procesador para controlar otros elementos.
 \end{itemize}
 
@@ -95,10 +95,10 @@ La memoria tiene 3 características principales que la definen:
 \end{enumerate}
 \section{Unidad Central de Proceso}
 \subsection{Unidad Aritmético Lógica}
-El ALU realiza las operaciones lógicas y aritméticas sobre cadenas de bits de longitud fija. Tiene 2 operando, y se trata de un circuito digital, por lo que tiene señales de control que le permiten seleccionar la operación. Solo puede ejecutar las ordenes para la que está diseñado. Los operandos pueden estar sobre registros o sobre memoria.
+El ALU realiza las operaciones lógicas y aritméticas sobre cadenas de bits de longitud fija. Tiene 2 operandos, y se trata de un circuito digital, por lo que tiene señales de control que le permiten seleccionar la operación. Sólo puede ejecutar las ordenes para la que está diseñado. Los operandos pueden estar sobre registros o sobre memoria.
 La ALU tiene un registro especial asociado, el \emph{registro de estado (RE)}. Este registro opera usando los diferentes bits del mismo como flags, y contienen información sobre la \emph{última} operación que se llevó a cabo en la ALU. Cada vez que la ALU realiza una operación, se actualiza el registro para reflejar el resultado de la misma. Los flags mas importantes son:
 \begin{itemize}
-\item Z \textrightarrow Resultado Cero (Se pone a valor 1 el flag si el resultado aritmetico ha sido exactamente cero)
+\item Z \textrightarrow Resultado Cero (Se pone a valor 1 el flag si el resultado aritmético ha sido exactamente cero)
 \item OVF \textrightarrow Overflow
 \item C \textrightarrow Acarreo (Carry)
 \item Paridad, etc...
@@ -117,7 +117,7 @@ Son elementos de almacenamiento temporal, ubicados en el procesador. Son extrema
 \begin{itemize}
 \item de propósito general
 \subitem Banco de registros
-\item de propósito especifico
+\item de propósito específico
 \subitem PC \textrightarrow Contador de Programa (Program Counter)
 \subitem SR \textrightarrow Registro de Estado (State Regisry)
 \subitem SP \textrightarrow Puntero de Pila (Stack Pointer)
@@ -128,7 +128,7 @@ Son elementos de almacenamiento temporal, ubicados en el procesador. Son extrema
 \end{itemize}
 Los registros de propósito general se usan explícitamente en el juego de instrucciones del computador. Pueden ser usados por cualquier instrucción que lleve a cabo operaciones sobre datos. Se suelen agrupar en bancos de registros, y tienen un tamaño igual al de la palabra.
 
-Los registros de propósito especifico tienen su uso restringido a determinadas instrucciones, y suelen usarlo de forma implícita.
+Los registros de propósito específico tienen su uso restringido a determinadas instrucciones, y suelen usarlo de forma implícita.
 
 Los registros transparentes son los que usa internamente el procesador, y no se especifican en las instrucciones. No son accesibles fuera de la unidad central de proceso.
 \end{document}
