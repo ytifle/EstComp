@@ -131,4 +131,94 @@ Los registros de propósito general se usan explícitamente en el juego de instr
 Los registros de propósito específico tienen su uso restringido a determinadas instrucciones, y suelen usarlo de forma implícita.
 
 Los registros transparentes son los que usa internamente el procesador, y no se especifican en las instrucciones. No son accesibles fuera de la unidad central de proceso.
+
+Dos de los registros invisibles se usan para acceder a la memoria. Cada vez que hay que direccionar, la CPU carga la dirección en el Registro de Direcciones(AR), y manda la señal de control de READ y MEMORY ENABLE. Los datos de esa dirección se cargan tras el tiempo de acceso en el Registro de Datos (DR). En la escritura, se carga el dato en el DR, y la dirección de memoria en el AR, y se lanzan las señales de ME, y WRITE. El DR por ende se puede cargar de 2 sitios, desde la memoria o desde el procesador.
+
+\subsection {Unidad de Control}
+Es el tercer elemento que forma parte de la CPU. Es la encargada de leer las instrucciones de la memoria, de decodificarlas, analizarlas, y dar las ordenes a todos los elementos del procesador para su ejecución. Se trata de un circuito digital muy complejo, ya que han de funcionar todas las señales en momentos específicos. Se trata de un circuito síncrono, controlado por los pulsos generados por el reloj de la CPU (CLK). Este reloj indicará la velocidad a la que se realizan las operaciones en el procesador.
+
+El procesador lee el registro de instrucción (IR) y el registro de estado (SR), y toma decisiones basado en estos. En cada ciclo/periodo de reloj, genera las señales de control asociadas a ese momento específico de ejecución, señales para la ALU, señales para el banco de registros, acceso a los buses, etc...
+
+Es importante tener en cuenta que no todas las instrucciones se ejecutan en el proceso de un ciclo de CPU, y que los elementos más lentos de esta son la memoria y la ALU.
+
+\subsection{Fases de ejecución de una instrucción}
+\emph{Es importante no confundir la fase de ejecución con la ejecución en global.}
+La ejecución de una instrucción se divide en 3 partes:
+
+\begin{itemize}
+\item Fase de fetch
+\subitem Leer la instrucción de la memoria, de la dirección del PC.
+\subitem Cargar la instrucción en el Registro de Instrucciones (IR)
+\subitem Incrementar el PC para que apunte a la siguiente palabra.
+\item Decodificación
+\item Fase de Ejecución
+\subitem Búsqueda de operandos.
+\subitem Operación
+\subitem Almacenamiento de Resultado.
+\end{itemize}
+
+La fase de fetch (o fase de búsqueda) es igual para todas las instrucciones. Todas tienen fase de fetch, y en todas tarda lo mismo. En esta fase, se lee la instrucción de la memoria principal de la dirección almacenada en el PC; se carga esta en el Registro de Instrucción (RI), y se incrementa el valor del PC para que este contenga ahora la dirección de la siguiente palabra. Los ciclos que tarde toda esta operación dependerá del procesador, la memoria...
+
+A la decodificación le asignamos un ciclo de reloj.
+
+La fase de ejecución, como máximo, lo que hará será buscar los operandos, ya bien se encuentren en registro o en memoria, realizar la operación en sí, y almacenar el resultado. Hay instrucciones que no tienen fase de ejecución, como los saltos condicionales; como por ejemplo, si no se cumple la condición de salto.
+\\\\
+Observemos un ejemplo de ejecución:
+\begin{verbatim}
+sub .r1,.r1,.r2
+\end{verbatim}
+R1 \textleftarrow R1 + R2
+\begin{itemize}
+\item Fase de fetch: 
+\subitem Se lleva al AR el contenido del PC, y se realiza el acceso READ a la memoria principal. 
+\subitem Se carga en el DR la instrucción que estaba contenida en la memoria.
+\subitem Se lleva la instrucción del DR al IR.
+\subitem Se incrementa el PC en 1 palabra.
+\item Decodificación
+\item Fase de Ejecución:
+\subitem Se cargan r1 y r2 del banco de registros a la ALU, y se le indica el tipo de operación.
+\subitem Se realiza la operación y se actualiza SR.
+\subitem Se guarda el resultado en R1.
+\end{itemize}
+
+En un juego de instrucciones de un compilador hay diferentes tipos de instrucciones. Hay instrucciones que puede ejecutar el usuario, y otras que solo las puede ejecutar el sistema operativo. El usuario solo dispone de un subconjunto de las operaciones, que puede ejecutar en modo usuario. El S.O. es el que puede ejecutar las ordenes privilegiadas.
+
+\section{Unidad de Entrada/Salida}
+Es la encargada de realizar la conexión y el intercambio de información entre la CPU y los periféricos. Es necesaria porque los periféricos y el procesador tienen características muy diferentes, y difieren mucho en velocidad y tamaño de información que manejan. Esta unidad está compuesta por módulos de E/S que ocultan las particularidades de cada periférico. Además, es la encargada de la comunicación con el computador. Los módulos a su vez están constituidos por varios registros, que son en general el de datos, el de control y el de estado.
+
+Hay 2 problemas básicos a resolver para que los periféricos se comuniquen con la CPU.
+\subsection{Direccionamiento de los dispositivos}
+
+Se refiere a cómo seleccionar el periférico con el que se establecerá la comunicación. Se hace asignando a cada registro del modulo de E/S una dirección. Se selecciona a través del bus de direcciones. Con respecto a esta asignación de direcciones de módulos E/S, existen a su vez otras 2 posibilidades:
+\begin{itemize}
+\item \emph{Mapa de E/S y Memoria Principal Común} Parte de la memoria principal se usa para E/S, y dichas direcciones están protegidas. No se pueden usar las mismas direcciones para E/S y memoria principal. Esto implica que no es necesario usar señales de control diferentes ni instrucciones diferentes. Como el mapa de instrucciones es común, adicionalmente se pueden usar instrucciones de carga y almacenamiento en memoria sobre dichas direcciones.
+\item \emph{Mapa E/S y Memoria Principal Separados} Al ser 2 mapas diferentes, se pueden usar direcciones correlativas, ya que se especifica si se accede a la memoria principal o a la modulo de E/S. Por ejemplo, \emph{MemQR(1000)} y \emph{IOQR(1000)} tendrán como resultado el contenido de la memoria principal en la dirección 1000, o el contenido de memoria de I/O [E/S en inglés, Input/Output] en la dirección 1000. Adicionalmente, se dispondrán de instrucciones específicas para la E/S.
+\end{itemize}
+\subsection{Modos de realizar la transferencia E/S}
+La operación de transferencia de E/S se puede establecer de 3 modos:
+\begin{itemize}
+\item \emph{E/S Programada} En este modo, es la CPU la que se encarga de controlar todo el proceso de E/S. Esto quiere decir, que comprueba el estado del periférico y si está preparado para comunicarse, envía o recibe el dato y continua la CPU con la siguiente instrucción. A ciclos regulares comprueba dichos estados. La CPU tiene entonces que estar observando el estado de los periféricos, esto es inconveniente ya que se pierde tiempo de procesador en realizar estas operaciones, y por ende, disminuye la productividad de la máquina.
+\item \emph{E/S por interrupciones} En este modo, es el periférico el que a través del módulo de E/S avisa a la CPU de que está preparado para la transferencia, y lo hace mediante una señal, denominada \emph{Señal de interrupción}. Cuando observa la CPU la señal de interrupción, el procesador hace la transferencia. Se ahorra tiempo, pero se sigue gastando tiempo en comprobar dicha señal. Al recibir la interrupción, la CPU interrumpe la ejecución del programa, salva el estado de la máquina y ejecuta un miniprograma denominado \emph{rutina de tratamiento de la información}. Esta da servicio al periférico que ha interrumpido. Es una rutina que se ejecuta en modo privilegiado. Una vez que ha terminado de dar servicio, restaura el estado del programa, y continúa con la ejecución del mismo. La CPU comprueba si hay interrupción \emph{después} de ejecutar cada instrucción. Las interrupciones se tratan como saltos condicionales, son bifurcaciones condicionales por una condición externa. La ventaja de este modo es que el tiempo ocupado por el procesador en las operaciones de E/S es mucho menor que en la E/S programada.
+\item \emph{Acceso Directo a Memoria (DMA)} En el DMA, la CPU sólo inicia la operación de E/S, es decir, ordena la transferencia pero no ejecuta instrucciones para producirla, con lo que puede ejecutar otras instrucciones mientras. Es el módulo de E/S el que accede directamente a memoria. Cuando el módulo acaba, envía otra señal para indicarlo. El problema de esto es que como se comparten los buses, estos pueden estar ocupados. Hay que implementar mecanismos para la gestión de buses. Pueden usarse memorias multipuerto, robo de ciclo, o otras tecnologías.
+\end{itemize}
+
+\section{Diseño de programas}
+En un computador Von Neumann, para que se puedan ejecutar programas, las instrucciones y los datos han de estar en el mismo lugar. Existen herramientas de diseño que nos ayudan a crear programas.
+\begin{itemize}
+\item \emph{Compilador} Genera a partir de un lenguaje de alto nivel un programa en lenguaje máquina (el programa objeto). Es el ejecutable, y puede ejecutarse tantas veces como se desee.
+\item \emph{Programa Ensamblador} El código máquina viene derivado de un lenguaje máquina, también denominado Ensamblador (Assembler, asm), que lo genera dentro del compilador un programa ensamblador. Todavía las ordenes no están en binario, pero tienen una correlación directa con el. El ensamblador transforma dicho lenguaje máquina en el código máquina. Cada programa ensamblador viene derivado del juego de instrucciones del procesador para el cual está diseñado.
+\item \emph{Cargador} Es el encargado de transferir a memoria principal el programa desde el almacenamiento secundario.
+\item \emph{Sistema Operativo} Realiza la gestión de los recursos de la máquina, y tiene otras funciones, como ocultar la complejidad de los periféricos y la protección de los recursos (para que el usuario no pueda realizar operaciones invalidas o maliciosas. El núcleo del sistema operativo se ejecuta en modo privilegiado.
+\end{itemize}
+
+\section{Parámetros Característicos}
+\begin{itemize}
+\item \emph{Ancho de Palabra} Es el número de bits que maneja en paralelo el procesador. En general, coincide con el tamaño de los registros y del bus de datos.
+\item \emph{Tamaño de Memoria} Se expresa en bytes.
+\item \emph{Frecuencia de Reloj} Determina la velocidad a la que se realizan eventos en la máquina. La inversa de este es el ciclo.
+\item \emph{Capacidad de Cómputo} Tambien denominado productividad, velocidad, o throughput. Es el trabajo útil partido del tiempo. Se puede medir en MIPS, Millions of Instructions per Second (Millones de instrucciones por cada segundo), y en MFLOPS, Million of Floating Operations per Second (Millones de operaciones de coma flotante por cada segundo).
+\item \emph{Ancho de Banda} Cantidad de información que es capaz de transmitir una unidad del computador.
+\end{itemize}
+
+
 \end{document}
