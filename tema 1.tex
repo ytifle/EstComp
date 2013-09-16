@@ -220,5 +220,61 @@ En un computador Von Neumann, para que se puedan ejecutar programas, las instruc
 \item \emph{Ancho de Banda} Cantidad de información que es capaz de transmitir una unidad del computador.
 \end{itemize}
 
+\chapter{Ensamblador}
+\section{Lenguaje Máquina}
+
+El lenguaje máquina está formado por datos e instrucciones almacenados en memoria en forma binaria; específico para cada computador. El programa está constituido por instrucciones, que son las unidades elementales auto-contenidas que ejecuta el computador. Realizan una única y sencilla orden, y tienen un número fijo de operandos.
+
+En general se ajustan a la palabra del computador, pero también se pueden tener instrucciones de 2 y media palabra. El juego de instrucciones son las posibles instrucciones que ejecuta el computador.
+ 
+El formato de la instrucción es la representación de cada campo. El juego de instrucciones tiene el número de formas mas básico posible. Los operandos son la ubicación, que muchas veces nombramos como dirección, de los operandos. Estos pueden estar en la propia instrucción, en los registros, o en la memoria. Dependiendo de donde esté, se especifica como veremos más adelante. El campo de operandos puede estar dividido en suboperandos. Cuando los operandos son implícitos, puede no tener operandos la instrucción.
+
+Se plantean 4 posibilidades para la separación en suboperandos:
+\begin{itemize}
+\item \emph{0 Direcciones} \textrightarrow Cuando los operandos son implícitos.
+\item \emph{1 Dirección} \textrightarrow En general, la dirección es el origen y el destino.
+\item \emph{2 Direcciones} \textrightarrow En general, el primero es origen y destino, y el operando 2 origen.
+\item \emph{3 Direcciones} \textrightarrow El operador 1 origen, y los operadores 2 y 3 destinos.
+\end{itemize}
+
+\subsection{Tipos de datos}
+\begin{itemize}
+\item Palabras(tamaño privilegiado del procesador), medias palabras, bytes.
+\item Acceso a memoria 
+\subitem A palabra \textrightarrow Cada palabra tiene una dirección.
+\subitem A byte \textrightarrow Cada byte tiene una dirección.
+\item Alineación a palabra \textrightarrow Se direcciona al primer byte de la palabra.
+\item Ordenación de bytes en memoria
+(TODO AGREGAR DIBUJOS)
+\subitem \emph{Little Endian} Al LSB (Least Significant Bit, Bit menos significativo) le corresponde la dirección menor.
+\subitem \emph{Big Endian} Al MSB (Most Significant Bit, Bit mas significativo) le corresponde la dirección menor.
+\end{itemize}
+
+\subsection{Lenguaje Ensamblador (IEEE 694)}
+La traducción ensamblador/código máquina es inmediata. En lenguaje ensamblador, las instrucciones vienen definidas por un código nemónico y unos nombres simbólicos mientras que las instrucciones en código máquina son códigos binarios. (P.E. load \textrightarrow \verb|ld|)
+
+Las instrucciones en asm tienen la misma organización y estructura que las instrucciones máquina.
+
+(TODO AGREGAR DIBUJO INSTRUCCION - asm)
+
+Los nombres simbólicos que se utilizan para nombrar a las instrucciones son verbos de acción y códigos nemónicos de dichos verbos.
+\begin{quote}
+add \textrightarrow \verb|add|	load \textrightarrow \verb|ld|
+branch \textrightarrow \verb|br|	store \textrightarrow \verb|st|
+\end{quote}
+ 
+\subsection{Modos de Direccionamiento}
+\begin{itemize}
+\item \emph{Inmediato} \verb|#valor| \textrightarrow En binario o en complemento a 2.
+\item \emph{Directo} 
+	\begin{itemize}
+	\item Absoluto
+		\begin{itemize}
+			\item \emph{Registro}
+		\end{itemize}
+	\item Relativo
+	\end{itemize}
+
+\end{itemize}
 
 \end{document}
