@@ -161,7 +161,7 @@ La fase de fetch (o fase de búsqueda) es igual para todas las instrucciones. To
 
 A la decodificación le asignamos un ciclo de reloj.
 
-La fase de ejecución, como máximo, lo que hará será buscar los operandos, ya bien se encuentren en registro o en memoria, realizar la operación en sí, y almacenar el resultado. Hay instrucciones que no tienen fase de ejecución, como los saltos condicionales; como por ejemplo, si no se cumple la condición de salto.
+La fase de ejecución, como máximo, lo que hará será: buscar los operandos; ya bien se encuentren en registro o en memoria, realizar la operación en sí, y almacenar el resultado de esta. Hay instrucciones que no tienen fase de ejecución, como los saltos condicionales; como por ejemplo, si no se cumple la condición de salto.
 \\\\
 Observemos un ejemplo de ejecución:
 \begin{verbatim}
@@ -263,18 +263,110 @@ add \textrightarrow \verb|add|	load \textrightarrow \verb|ld|
 branch \textrightarrow \verb|br|	store \textrightarrow \verb|st|
 \end{quote}
  
-\subsection{Modos de Direccionamiento}
+\section{Modos de Direccionamiento}
 \begin{itemize}
 \item \emph{Inmediato} \verb|#valor| \textrightarrow En binario o en complemento a 2.
 \item \emph{Directo} 
 	\begin{itemize}
 	\item Absoluto
 		\begin{itemize}
-			\item \emph{Registro}
+		\item \emph{Registro} \verb|.registro|
+		\item \emph{Memoria} \verb|/dirMemoria|
 		\end{itemize}
 	\item Relativo
+		\begin{itemize}
+		\item \emph{Registro Base} \verb|#desp[.registro]|
+		\item \emph{Registro Indice} \verb|#desp[.registroIndice]|
+		\item \emph{PC} \verb|$desp|
+		\end{itemize}
 	\end{itemize}
-
+\item \emph{Indirecto}
+	\begin{itemize}
+	\item \emph{Registro} \verb|[.registro]|
+	\item \emph{Memoria} \verb|[/dirMemoria]|
+	\end{itemize}
+\item \emph{Implícito}
 \end{itemize}
-
+\subsection{Direccionamiento Inmediato}
+En el direccionamiento Inmediato, el objeto está contenido dentro de la propia instrucción. Son valores directos. \verb|ADD .R1,#4| En este caso, \verb|#4| es el valor que se sumará a R1.  \emph{R1 \textleftarrow R1+4}.
+\subsection{Direccionamiento Directo}
+En este direccionamiento, el objeto no está en la instrucción, esta contiene la información de donde está. Hay dos tipos de direccionamientos inmediatos, los absolutos, los cuales contienen la dirección completa, y los relativos, los cuales todos se refieren a la memoria principal, y tienen suficiente información para calcular cual es la dirección del objeto.
+\subsubsection{Direccionamiento Directo Absoluto a Registro}
+También denominado Direccionamiento Directo a Registro. En este direccionamiento, el objeto se encuentra en un registro. Lo que contienen la instrucción es la especificación de cual registro es.
+\subsubsection{Direccionamiento Directo Absoluto a Memoria}
+También denominado Direccionamiento Directo a Memoria. El objeto se encuentra en una dirección de memoria. La instrucción contiene la dirección completa de memoria.
+\subsection{Direccionamientos Relativos}
+En este tipo de direccionamientos el objeto está contenido en una dirección de memoria, pero la instrucción no contiene la dirección absoluta, sino información para calcularla.
+\subsubsection{Direccionamiento Relativo a Registro Base}
+El registro base contiene una dirección de memoria. Para calcular la dirección de memoria del objeto, se le suma un desplazamiento a la dirección contenida en el registro. Luego, la dirección del objeto es la dirección contenida en el registro base, mas el desplazamiento. El contenido del registro base no se altera, el desplazamiento no se aplica de forma destructiva.
+\subsubsection{Direccionamiento Relativo a Program Counter (PC)}
+En estas ordenes el PC está implícito. El PC es el registro base. Lo único que se especifica en este direccionamiento es el valor del desplazamiento. Estas cargan en el PC otra dirección. Esto nos permite hacer saltos cercanos. Según el estándar IEEE694, el PC se incrementa en el fetch, luego se aplica el desplazamiento sobre PC+1 palabra. (En el M88110 se verá que esto no es así para ese procesador). Es desplazamiento se carga con signo.
+\subsubsection{Direccionamiento Relativo a Registro Índice}
+Este desplazamiento tiene un registro base, pero en este desplazamiento se altera el contenido del registro base. La dirección del objeto, al igual que con el desplazamiento relativo a registro base, se calcula sumando la dirección del registro, y la del desplazamiento, pero con una modificación.
+El contenido de este registro se modifica con un pre/post incremento/decremento.
+\begin{itemize}
+\item \emph{Preincremento}: Se incrementa el valor del registro \emph{antes} de calcular la dirección.
+\item \emph{Predecremento}: Se decrementa el valor del registro \emph{antes} de calcular la dirección.
+\item \emph{Postincremento}: Se incrementa el valor del registro \emph{después} de calcular la dirección.
+\item \emph{Postincremento}: Se decrementa el valor del registro \emph{después} de calcular la dirección.
+\end{itemize}
+El tamaño del incremento/decremento es igual al tamaño del objeto transferido (palabra).
+\subsection{Direccionamiento Indirecto}
+En IEEE 694 se permiten todas las posibilidades, aquí solo vamos a ver algunas. La instrucción contiene la dirección del objeto. Pueden existir varios niveles de indirección. Hay 2 formas de realizar direccionamientos indirectos, a registro y a memoria.
+\subsubsection{Direccionamiento Indirecto a Registro}
+La instrucción contiene la especificación del registro, el cual contiene la dirección del objeto. Cuando solo hay un nivel de indirección es parecido al registro base con desplazamiento 0. Cuando hay varios niveles de indirección, el registro contiene la dirección de memoria que contiene la dirección de memoria del objeto. \verb|[[.R1]]| \textrightarrow 2 corchetes.
+Puede contener desplazamientos. Adicionalmente, permite pre/postincrementos y pre/postdecrementos.
+\subsubsection{Direccionamiento Indirecto a Memoria}
+La instrucción contiene una dirección de memoria, la cual contiene la dirección del objeto. \verb|LD .R1,[/1000]| es R1 \textleftarrow MEM(MEM(1000)).
+\subsection{Direccionamiento Implícito}
+En la instrucción no hay información ni sobre la dirección ni sobre el objeto. Para los operandos no implícitos de la instrucción, son posibles todos los direccionamientos que hemos visto. En una instrucción, pueden coexistir modos de direccionamiento diferentes.
+\subsubsection{Direccionamiento Implícito a Pila}
+Es un tipo de direccionamiento en el que el puntero de pila (SP) es implícito. El SP puede apuntar a la primera posición libre o ocupada de la pila. A su vez, la pila puede crecer hacia direcciones de memoria crecientes o decrecientes.
+Aunque el sistema no tenga una pila gestionada por el procesador, se puede hacer una pila a mano, seleccionando una zona en memoria que será usada para la pila, y usando como SP un registro de propósito general.
+Supongamos que la pila está implementada en memoria. Hay 2 instrucciones que trabajan con la pila, \verb|PUSH| y \verb|POP|. \verb|PUSH| es guardar en la pila, \verb|POP| es sacar de la pila. El procesador automáticamente actualiza SP y gestiona la pila.
+\verb|TODO: ¿METO AQUI LOS EJEMPLOS DE OPERACION DE LA PILA?|
+\section{Juego de Instrucciones}
+El juego de instrucciones es el conjunto de las instrucciones de un computador especifico. Son las herramientas con las que se construye un programa. Hay muchos tipos de tipos de instrucciones.
+\subsection{Transferencia de Datos}
+Mueven los datos entre registros y memoria. No modifican los biestables de estado. Copian el origen en el destino, sin modificar el origen.
+\begin{itemize}
+\item \verb|LD| (load) Cargar un registro. [DEST(REG), ORIG(INMM/DIR.MEM.)]
+\item \verb|ST| (store) Almacenar en memoria. [ORIG(INMM/REG), DEST(DIR.MEM)]
+\item \verb|MOVE| (move) Mueve un objeto. [ORIG, DEST]  REG a REG ó MEM a MEM
+\end{itemize}
+\subsection{Bifurcaciones (o Saltos)}
+Modifican la estructura de flujo del programa. Cargan el PC con la dirección de la bifurcación (la siguiente instrucción que se ejecutará). No modifican el SR
+\subsubsection{Incondicionales} 
+\verb|BR| (branch). Siempre que se ejecuta, salta a la dirección de la instrucción. No hay una condición para el salto. Detrás de la instrucción \verb|BR|, tiene que haber una dirección de memoria, indicada por cualquier modo de direccionamiento.
+\subsubsection{Condicionales}
+También tienen que tener una dirección con los diferentes modos de direccionamiento. Saltan si se cumple la condición de salto (que coincida el estado del bit de estado con el estado esperado). Si no coincide no hace nada.
+Saltos comunes
+\begin{itemize}
+\item \emph{Z} \textrightarrow Zero
+\item \emph{NZ} \textrightarrow Not Zero
+\item \emph{C} \textrightarrow Carry (Accareo)
+\item \emph{NC} \textrightarrow No Carry (Sin acarreo)
+\item \emph{V} \textrightarrow Overflow (Desbordamiento)
+\item \emph{NV} \textrightarrow No Overflow (Sin Desbordamiento)
+\item \emph{P} \textrightarrow Par
+\item \emph{N} \textrightarrow Negativo
+\end{itemize}
+Usan los estados de la última operación de la ALU.
+\subsubsection{Con Retorno}
+Se utilizan para implementar subrutinas (macros). En estas, se salta y se vuelve mas adelante, al contrario de los otros saltos.
+Una subrutina es un segmento de código, al que se pueden saltar desde otros programas. Se accede a las subrutinas con \verb|CALL|, (llamada a subrutina). En las subrutinas, hay un comando para salir de la misma, \verb|RET|. Esta instrucción es implícita, y continua con la ejecución del programa después del \verb|CALL|.
+\verb|CALL| guarda el PC, y \verb|RET| lo recupera. Existen 2 sitios para guardar el PC
+\begin{itemize}
+\item Un registro de carácter general, con lo que no se permiten llamadas anidadas, ya que si no perderíamos las llamadas anteriores
+\item En la pila, lo que permite llamadas anidadas, ya que podemos guardar todos los retornos que necesitemos. Hay que tener cuidado con la gestión de la pila para saber que estamos apuntando a la instrucción correcta.
+\end{itemize}
+\subsection{Aritméticas y Comparación}
+IEEE permite 3 operandos y 4 operandos para la división.
+[ORIG/DEST, ORIG] y [DEST, ORIG, ORIG]
+\begin{itemize}
+\item \verb|ADD| Suma \textrightarrow \verb|ADD .R1, .R2|
+\item \verb|SUB| Resta \textrightarrow \verb|SUB .R1, .R2|
+\item \verb|MUL| Multiplicación \textrightarrow \verb|MUL .R1, .R2|
+\item \verb|DIV| División \textrightarrow \verb|DIV .R1, .R2|
+\end{itemize}
 \end{document}
