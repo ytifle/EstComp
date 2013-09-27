@@ -231,23 +231,23 @@ El formato de la instrucción es la representación de cada campo. El juego de i
 
 Se plantean 4 posibilidades para la separación en suboperandos:
 \begin{itemize}
-\item \emph{0 Direcciones} \textrightarrow Cuando los operandos son implícitos.
-\item \emph{1 Dirección} \textrightarrow En general, la dirección es el origen y el destino.
-\item \emph{2 Direcciones} \textrightarrow En general, el primero es origen y destino, y el operando 2 origen.
-\item \emph{3 Direcciones} \textrightarrow El operador 1 origen, y los operadores 2 y 3 destinos.
+\item \emph{0 Direcciones} --- Cuando los operandos son implícitos.
+\item \emph{1 Dirección} --- En general, la dirección es el origen y el destino.
+\item \emph{2 Direcciones} --- En general, el primero es origen y destino, y el operando 2 origen.
+\item \emph{3 Direcciones} --- El operador 1 origen, y los operadores 2 y 3 destinos.
 \end{itemize}
 
 \subsection{Tipos de datos}
 \begin{itemize}
 \item Palabras(tamaño privilegiado del procesador), medias palabras, bytes.
 \item Acceso a memoria 
-\subitem A palabra \textrightarrow Cada palabra tiene una dirección.
-\subitem A byte \textrightarrow Cada byte tiene una dirección.
-\item Alineación a palabra \textrightarrow Se direcciona al primer byte de la palabra.
+\subitem A palabra --- Cada palabra tiene una dirección.
+\subitem A byte --- Cada byte tiene una dirección.
+\item Alineación a palabra --- Se direcciona al primer byte de la palabra.
 \item Ordenación de bytes en memoria
 (TODO AGREGAR DIBUJOS)
-\subitem \emph{Little Endian} Al LSB (Least Significant Bit, Bit menos significativo) le corresponde la dirección menor.
-\subitem \emph{Big Endian} Al MSB (Most Significant Bit, Bit mas significativo) le corresponde la dirección menor.
+\subitem \emph{Little Endian} --- Al LSB (Least Significant Bit, Bit menos significativo) le corresponde la dirección menor.
+\subitem \emph{Big Endian} --- Al MSB (Most Significant Bit, Bit mas significativo) le corresponde la dirección menor.
 \end{itemize}
 
 \subsection{Lenguaje Ensamblador (IEEE 694)}
@@ -330,9 +330,9 @@ El juego de instrucciones es el conjunto de las instrucciones de un computador e
 \subsection{Transferencia de Datos}
 Mueven los datos entre registros y memoria. No modifican los biestables de estado. Copian el origen en el destino, sin modificar el origen.
 \begin{itemize}
-\item \verb|LD| (load) Cargar un registro. [DEST(REG), ORIG(INMM/DIR.MEM.)]
-\item \verb|ST| (store) Almacenar en memoria. [ORIG(INMM/REG), DEST(DIR.MEM)]
-\item \verb|MOVE| (move) Mueve un objeto. [ORIG, DEST]  REG a REG ó MEM a MEM
+\item \verb|LD| (load) Cargar un registro. \verb|DEST(REG), ORIG(INMM/DIR.MEM.)|
+\item \verb|ST| (store) Almacenar en memoria. \verb|ORIG(INMM/REG), DEST(DIR.MEM)|
+\item \verb|MOVE| (move) Mueve un objeto. \verb|ORIG, DEST| Solo puede ser registro a registro o memoria a memoria.
 \end{itemize}
 \subsection{Bifurcaciones (o Saltos)}
 Modifican la estructura de flujo del programa. Cargan el PC con la dirección de la bifurcación (la siguiente instrucción que se ejecutará). No modifican el SR
@@ -362,11 +362,94 @@ Una subrutina es un segmento de código, al que se pueden saltar desde otros pro
 \end{itemize}
 \subsection{Aritméticas y Comparación}
 IEEE permite 3 operandos y 4 operandos para la división.
-[ORIG/DEST, ORIG] y [DEST, ORIG, ORIG]
+[ORIG/DEST, ORIG] y [DEST, ORIG, ORIG]. Todas las operaciones aritméticas modifican el registro de estado(SR).
 \begin{itemize}
 \item \verb|ADD| Suma \textrightarrow \verb|ADD .R1, .R2|
 \item \verb|SUB| Resta \textrightarrow \verb|SUB .R1, .R2|
 \item \verb|MUL| Multiplicación \textrightarrow \verb|MUL .R1, .R2|
 \item \verb|DIV| División \textrightarrow \verb|DIV .R1, .R2|
+\item \verb|ADDC| Suma con Acarreo \textrightarrow \verb|ADDC .R1, .R2|
+\item \verb|SUBC| Resta con Acarreo \textrightarrow \verb|SUBC .R1, .R2|
+\item \verb|CMP| Resta Comparativa (2 Operandos) \textrightarrow \verb|CMP .R1, .R2| La resta comparativa resta los 2 registros, modifica el SR, con lo que se puede leer si el resultado es 0 (luego son idénticos), pero no tiene salida. [ORIG, ORIG]
 \end{itemize}
+Estas instrucciones fijan el modelo de ejecución del procesador; memoria a memoria, registro a memoria, registro a registro.
+\subsection{Lógicas}
+Realizan operaciones lógicas bit a bit. Modifican el registro de estado (SR).
+\begin{itemize}
+\item \verb|AND| AND lógico \textrightarrow \verb|AND .R1, .R2|
+\item \verb|OR| OR lógico \textrightarrow \verb|OR .R1, .R2|
+\item \verb|XOR| XOR (OR exclusivo) lógico \textrightarrow \verb|XOR .R1, .R2|
+\item \verb|NOT| NOT lógico \textrightarrow \verb|NOT .R1| Solo tiene un operando, origen/destino.
+\end{itemize}
+Estos operandos se usan para máscaras, por ejemplo, si hacemos \\ \verb|AND .R1, #4|, y comprobamos Z del SR, si Z es 0, el contenido de .R1 es par.
+\subsection{Desplazamientos}
+Desplaza los bits de una palabra. El bit desplazado puede volcarse sobre un biestable, o perderse. Hay varias formas de calcular el bit que entra en el desplazamiento.
+\subsubsection{Desplazamientos Lógicos}
+Simplemente desplazan los bits hacia izquierda o derecha de la palabra, sin hacer operaciones aritméticas. . Los bits que entran \emph{siempre} son ceros.
+\begin{itemize}
+\item \verb|SHL| \textrightarrow Shift (to the) Left / Desplazar hacia la izquierda. Saca el MSB (Most Significant Bit/Bit mas significativo), TODO: ESTO ES ASÍ???
+\item \verb|SHR| \textrightarrow Shift (to the) Right / Desplazar hacia la derecha. Saca el LSB (Least Significant Bit/Bit menos significativo), TODO: ESTO ES ASÍ???
+\end{itemize}
+\subsubsection{Desplazamientos Aritméticos}
+Se usan para representaciones en base 2. El número que aparece dentro del desplazamiento es
+Realizan una multiplicación por la base (2), cuando se desplaza a la izquierda, y una división por la base cuando se desplaza a la derecha.
+\begin{itemize}
+\item \verb|ASL| \textrightarrow Arithmetical Shift Left / Desplazamiento aritmético a la izquierda. (*2)
+\item \verb|ASR| \textrightarrow Arithmetical Shift Right / Desplazamiento aritmético a la derecha. (/2)
+\end{itemize}
+\subsection{Rotación}
+Rota los bits de la palabra, desplazando todos un bit hacia la izquierda o un bit hacia la derecha. El bit que sale, entra en la palabra por el otro lado, al contrario que en los desplazamientos.
+\begin{itemize}
+\item \verb|ROL| \textrightarrow Rotate (to the) Left / Rotar a la izquierda. TODO DUDA MSB??
+\item \verb|ROR| \textrightarrow Rotate (to the) Right / Rotar a la derecha. TODO DUDA MSB???
+\end{itemize}
+Hay una variante, que saca el bit del acarreo.
+\begin{itemize}
+\item \verb|ROLC| \textrightarrow Rotate (to the) Left Carry / Rotar a la izquierda con el acarreo.
+\item \verb|RORC| \textrightarrow Rotate (to the) Right Carry / Rotar a la derecha con el acarreo.
+\end{itemize}
+\subsection{De bit}
+Hace su función sobre un bit de la palabra. En las palabras, el LSB es 0. [\#BIT, DEST/ORIG]
+\begin{itemize}
+\item \verb|CLR.I| \textrightarrow Pone el bit seleccionado a 0.
+\item \verb|SET.I| \textrightarrow Pone el bit seleccionado a 1.
+\item \verb|TEST.I| \textrightarrow Devuelve el valor del bit. (Al SR)
+\end{itemize}
+\subsection{Entrada/Salida}
+Son un tipo de instrucciones de transferencia para acceder a los periféricos de la CPU.
+\begin{itemize}
+\item \verb|IN| \textrightarrow [DEST REG, ORIG MEM] Carga desde el periférico con la dirección indicada al registro DEST.
+\item \verb|OUT| \textrightarrow [ORIG REG, DEST MEM] Carga el periférico con la dirección indicada con el contenido del registro ORIG.
+\end{itemize}
+\subsection{Instrucciones Sin Operandos}
+\begin{itemize}
+\item \verb|HOLD| \textrightarrow Para la ejecución
+\item \verb|WAIT| \textrightarrow Lanza un proceso de espera
+\item \verb|NOP| \textrightarrow No OPeration. No realiza una operación en esa instrucción.
+\item \verb|TRAP| \textrightarrow Interrupción de software.
+\end{itemize}
+\subsection{Sufijos/Extensiones}
+Se añade al nemónico de la instrucción. Dan mas información sobre la operación. Pueden ser del tipo:
+\begin{itemize}
+\item \emph{Referidos a condiciones del SR} Por ejemplo, \verb|ADDC| frente a \verb|ADD|, indica que la suma sea con acarreo. \verb|BNZ| Saltar si no Z.
+\item \emph{Referidos a la transferencia de la información}
+\begin{itemize}
+\item \verb|.I| \textrightarrow Bit
+\item \verb|.N| \textrightarrow N bits
+\item \verb|.B| \textrightarrow Byte  (TODO: ES B O D??)
+\item \verb|.L| \textrightarrow Doble Palabra
+\item \verb|.S| \textrightarrow Media Palabra
+\end{itemize}
+\item \emph{Referidos a la representación de datos}
+\begin{itemize}
+\item \verb|U| \textrightarrow \emph{Unsigned} Sin signo
+\item \verb|D| \textrightarrow \emph{Decimal} Decimal
+\item \verb|F| \textrightarrow \emph{Float} En coma flotante
+\end{itemize}
+\end{itemize}
+\section{Computadores CISC y RISC}
+Del ingles \emph{Complex Instruction Set Computer} (Ordenador con juego de instrucciones complejo) y \emph{Reduced Instruction Set Computer} (Ordenador con juego de instrucciones reducido).
+Son dos filosofías de diseño de computadores relacionadas con los avances tecnológicos. Hasta los 80's, las memorias eran mucho mas lentas que el procesador, y con un tamaño muy pequeño. Se plantearon reducir los accesos a memoria, el tamaño de los programas, y aumentar el número de instrucciones del juego (a unas 300-500 instrucciones). 
+Se aumentaba también con ello la complejidad de los modos de direccionamiento. Lo que se perseguía con esto era reducir el salto semántico entre los lenguajes de alto nivel y asm (ensamblador). De aquí nace el estandar IEEE694.
+A partir de los 80's, aparecieron las memorias caché con velocidades muy próximas a las del procesador. El desarrollo tecnológico permitió diseños más simples, lo que desembocó en la arquitectura RISC, con más registros en la CPU, de modo que se trabaje con el modelo de registro a registro. Además, estas máquinas comenzaron a usar juegos de instrucciones muy reducidos (30-40 instrucciones). Las instrucciones son más sencillas, con muchos menos modos de direccionamiento. Los programas son entonces de mayor tamaño. Hoy en día, la mayoría de los procesadores son RISC. Entre ellos se encuentra el Motorola 88110.
 \end{document}
