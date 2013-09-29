@@ -361,7 +361,7 @@ Una subrutina es un segmento de código, al que se pueden saltar desde otros pro
 \item En la pila, lo que permite llamadas anidadas, ya que podemos guardar todos los retornos que necesitemos. Hay que tener cuidado con la gestión de la pila para saber que estamos apuntando a la instrucción correcta.
 \end{itemize}
 \subsection{Aritméticas y Comparación}
-IEEE permite 3 operandos y 4 operandos para la división.
+IEEE permite 3 operandos para estas operaciones y 4 operandos para la división.
 [ORIG/DEST, ORIG] y [DEST, ORIG, ORIG]. Todas las operaciones aritméticas modifican el registro de estado(SR).
 \begin{itemize}
 \item \verb|ADD| Suma \textrightarrow \verb|ADD .R1, .R2|
@@ -450,6 +450,26 @@ Se añade al nemónico de la instrucción. Dan mas información sobre la operaci
 \section{Computadores CISC y RISC}
 Del ingles \emph{Complex Instruction Set Computer} (Ordenador con juego de instrucciones complejo) y \emph{Reduced Instruction Set Computer} (Ordenador con juego de instrucciones reducido).
 Son dos filosofías de diseño de computadores relacionadas con los avances tecnológicos. Hasta los 80's, las memorias eran mucho mas lentas que el procesador, y con un tamaño muy pequeño. Se plantearon reducir los accesos a memoria, el tamaño de los programas, y aumentar el número de instrucciones del juego (a unas 300-500 instrucciones). 
-Se aumentaba también con ello la complejidad de los modos de direccionamiento. Lo que se perseguía con esto era reducir el salto semántico entre los lenguajes de alto nivel y asm (ensamblador). De aquí nace el estandar IEEE694.
+Se aumentaba también con ello la complejidad de los modos de direccionamiento. Lo que se perseguía con esto era reducir el salto semántico entre los lenguajes de alto nivel y asm (ensamblador). De aquí nace el estándar IEEE694.
 A partir de los 80's, aparecieron las memorias caché con velocidades muy próximas a las del procesador. El desarrollo tecnológico permitió diseños más simples, lo que desembocó en la arquitectura RISC, con más registros en la CPU, de modo que se trabaje con el modelo de registro a registro. Además, estas máquinas comenzaron a usar juegos de instrucciones muy reducidos (30-40 instrucciones). Las instrucciones son más sencillas, con muchos menos modos de direccionamiento. Los programas son entonces de mayor tamaño. Hoy en día, la mayoría de los procesadores son RISC. Entre ellos se encuentra el Motorola 88110.
+\chapter{Motorola 88110}
+\section{Arquitectura 88110}
+El Motorola 88110 es un procesador RISC de 3 direcciones/operandos. Se trata de un procesador con un modelo de ejecución de registro a registro. Para la nomenclatura de los registros, se usarán \verb|r| minúscula, y \verb|S| (source) para indicar origen, y \verb|D| (destination) para indicar el destino. A diferencia del IEEE694, el M88110 no usa un punto delante de los registros.
+
+La palabra del procesador es de 32 bits, y la ALU de este opera en complemento a 2. Dispone de dos tipos de ejecución, en serie, la cual será usada en esta asignatura, y superescalar.
+\subsection{Banco de Registros}
+El Motorola 88110 dispone de un banco de 32 registros de 32 bits de propósito general, en el rango \verb|r0| al \verb|r31|. Hay 2 registros específicos dentro de este banco.
+\verb|r0| está cableado a 0, luego siempre devolverá 32 bits de 0's, y \verb|r1| es el registro que almacena la dirección de retorno de subrutina.
+
+En este procesador, no hay implementado un puntero de pila, por lo que se define un estandar a seguir por todos los alumnos. Reservaremos para esta función \verb|r30| y \verb|r31|.
+\begin{itemize}
+\item \verb|r30| \textrightarrow puntero de pila
+\item \verb|r31| \textrightarrow puntero del marco de pila
+\end{itemize}
+Con estos registros reservados, quedan 28 registros usables, de \verb|r2| a \verb|r29|
+
+Estos registros son accesibles por pares en 64 bits. En el M88110 el SR se denomina \verb|PSR|. Un bar de bits importantes de este son:
+\begin{itemize}
+\item \verb|text|
+\end{itemize}
 \end{document}
